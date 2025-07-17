@@ -1,0 +1,109 @@
+[
+  {
+    "name": "ROLE_ADMIN",
+    "modulePermissions": [
+      {
+        "moduleName": "USER",
+        "permissions": [
+          "CREATE",
+          "VIEW",
+          "EDIT",
+          "DELETE"
+        ]
+      },
+      {
+        "moduleName": "CUSTOMER",
+        "permissions": [
+          "CREATE",
+          "VIEW"
+        ]
+      },
+      {
+        "moduleName": "ACCOUNT",
+        "permissions": [
+          "VIEW",
+          "EDIT",
+          "CREATE",
+          "DELETE"
+        ]
+      },
+      {
+        "moduleName": "TRANSACTION",
+        "permissions": [
+          "VIEW",
+          "EDIT",
+          "CREATE",
+          "DELETE"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ROLE_CLERK",
+    "modulePermissions": [
+      {
+        "moduleName": "CUSTOMER",
+        "permissions": [
+          "CREATE",
+          "VIEW"
+        ]
+      },
+      {
+        "moduleName": "ACCOUNT",
+        "permissions": [
+          "VIEW",
+          "EDIT",
+          "CREATE",
+          "DELETE"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ROLE_MANAGER",
+    "modulePermissions": [
+      {
+        "moduleName": "CUSTOMER",
+        "permissions": [
+          "CREATE",
+          "VIEW"
+        ]
+      },
+      {
+        "moduleName": "ACCOUNT",
+        "permissions": [
+          "VIEW",
+          "EDIT",
+          "CREATE",
+          "DELETE"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ROLE_CASHIER",
+    "modulePermissions": [
+      {
+        "moduleName": "CUSTOMER",
+        "permissions": [
+          "VIEW"
+        ]
+      },
+      {
+        "moduleName": "ACCOUNT",
+        "permissions": [
+          "VIEW"
+        ]
+      },
+      {
+        "moduleName": "TRANSACTION",
+        "permissions": [
+          "VIEW",
+          "EDIT",
+          "CREATE",
+          "DELETE"
+        ]
+      }
+    ]
+  }
+]

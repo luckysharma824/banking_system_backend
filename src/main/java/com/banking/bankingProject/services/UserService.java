@@ -111,6 +111,23 @@ public class UserService {
         moduleRepository.saveAll(modules);
         permissionRepository.saveAll(permissions);
 
+        UserDto userDto = new UserDto();
+        userDto.setUsername("admin");
+        userDto.setPassword("admin");
+
+
+        RoleDto roleDto = new RoleDto();
+        roleDto.setName(RoleEnum.ROLE_ADMIN);
+        ModulePermissionDto modulePermissionDto = new ModulePermissionDto();
+        modulePermissionDto.setModuleName(ModuleEnum.USER);
+        modulePermissionDto.setPermissions(Arrays.asList(PermissionEnum.CREATE, PermissionEnum.EDIT, PermissionEnum.VIEW, PermissionEnum.DELETE));
+        roleDto.setModulePermissions(List.of(modulePermissionDto));
+
+        Role role = addRoles(roleDto);
+        role.setId(role.getId());
+        userDto.setRoles(List.of(roleDto));
+
+        createUser(userDto);
     }*/
 
 }

@@ -18,21 +18,6 @@ public class Role {
     @Column(unique = true)
     private RoleEnum name;
 
-   /* @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_permission",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<Module> modules;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_module",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "module_id")
-    )
-    private Set<Permission> permissions;*/
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_module_permission",

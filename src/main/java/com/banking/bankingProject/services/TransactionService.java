@@ -29,7 +29,7 @@ public class TransactionService {
     public Transaction deposit(String accountNumber, BigDecimal amount, String txnId, TransactionTypeEnum type) {
         Account account = getAccount(accountNumber);
         if (AccountStatus.INACTIVE.equals(account.getAccountStatus())) {
-            throw new BankServiceException("EC-100", "To Account Not Found", null);
+            throw new BankServiceException("EC-100", "Inactive To Account", null);
         }
         account.setBalance(account.getBalance().add(amount));
         account.setLastTransactionDate(LocalDateTime.now());
@@ -46,7 +46,7 @@ public class TransactionService {
     public Transaction withdraw(String accountNumber, BigDecimal amount, String txnId, TransactionTypeEnum type) {
         Account account = getAccount(accountNumber);
         if (AccountStatus.INACTIVE.equals(account.getAccountStatus())) {
-            throw new BankServiceException("EC-100", "From Account Not Found", null);
+            throw new BankServiceException("EC-100", "Inactive From Account", null);
         }
         if (account.getBalance().compareTo(amount) >= 0) {
             account.setBalance(account.getBalance().subtract(amount));
