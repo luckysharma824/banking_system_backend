@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/users")
@@ -42,8 +44,8 @@ public class UserController {
     }
 
     @PostMapping("/roles")
-    public ResponseEntity<Object> addRoles(@RequestBody RoleDto roleDto) {
-        Role role = userService.addRoles(roleDto);
+    public ResponseEntity<Object> addRoles(@RequestBody List<RoleDto> roleDto) {
+        List<Role> role = userService.addRoles(roleDto);
         return ResponseHandler.handle(role,"Roles successfully successfully", true, HttpStatus.OK);
     }
 }

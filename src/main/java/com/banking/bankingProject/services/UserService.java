@@ -62,36 +62,41 @@ public class UserService {
         return RoleEnum.values();
     }
 
-    public Role addRoles(RoleDto roleDto) {
+    public List<Role> addRoles(List<RoleDto> roleDtos) {
 
-        Set<ModulePermission> modulePermissions = new HashSet<>();
-        for (ModulePermissionDto modulePermissionDto: roleDto.getModulePermissions()) {
+        List<Role> roleList = new ArrayList<>();
 
-            Module module = moduleRepository.findByName(modulePermissionDto.getModuleName());
-            if (module == null) {
-                throw new BankServiceException("EC-101", "Module not present", null);
+        roleDtos.forEach(roleDto -> {
+            Set<ModulePermission> modulePermissions = new HashSet<>();
+            for (ModulePermissionDto modulePermissionDto: roleDto.getModulePermissions()) {
+
+                Module module = moduleRepository.findByName(modulePermissionDto.getModuleName());
+                if (module == null) {
+                    throw new BankServiceException("EC-101", "Module not present", null);
+                }
+
+                List<Permission> permissions = permissionRepository.findByNameIn(modulePermissionDto.getPermissions());
+                if (permissions.size() != modulePermissionDto.getPermissions().size()) {
+                    throw new BankServiceException("EC-102", "Some permissions not present", null);
+                }
+
+                ModulePermission modulePermission = new ModulePermission();
+                modulePermission.setModule(module);
+                modulePermission.setPermissions(new HashSet<>(permissions));
+                modulePermissionRepository.save(modulePermission);
+
+                modulePermissions.add(modulePermission);
+
             }
-
-            List<Permission> permissions = permissionRepository.findByNameIn(modulePermissionDto.getPermissions());
-            if (permissions.size() != modulePermissionDto.getPermissions().size()) {
-                throw new BankServiceException("EC-102", "Some permissions not present", null);
+            Role role = roleRepository.findByName(roleDto.getName());
+            if (role == null) {
+                role = new Role();
+                role.setName(roleDto.getName());
             }
-
-            ModulePermission modulePermission = new ModulePermission();
-            modulePermission.setModule(module);
-            modulePermission.setPermissions(new HashSet<>(permissions));
-            modulePermissionRepository.save(modulePermission);
-
-            modulePermissions.add(modulePermission);
-
-        }
-        Role role = roleRepository.findByName(roleDto.getName());
-        if (role == null) {
-            role = new Role();
-            role.setName(roleDto.getName());
-        }
-        role.setModulePermissions(modulePermissions);
-        return roleRepository.save(role);
+            role.setModulePermissions(modulePermissions);
+            roleList.add(roleRepository.save(role));
+        });
+        return roleList;
     }
 
     /*@PostConstruct
@@ -123,8 +128,7 @@ public class UserService {
         modulePermissionDto.setPermissions(Arrays.asList(PermissionEnum.CREATE, PermissionEnum.EDIT, PermissionEnum.VIEW, PermissionEnum.DELETE));
         roleDto.setModulePermissions(List.of(modulePermissionDto));
 
-        Role role = addRoles(roleDto);
-        role.setId(role.getId());
+        addRoles(List.of(roleDto));
         userDto.setRoles(List.of(roleDto));
 
         createUser(userDto);
