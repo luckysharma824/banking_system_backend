@@ -23,7 +23,7 @@ public class AccountController {
 
     @PostMapping("/create")
     public ResponseEntity<Object> createAccount(@RequestParam String customerId, @RequestBody AccountDto account) {
-        //return accountService.createAccount(customerId, account);
+        // return accountService.createAccount(customerId, account);
         Account account1 = accountService.createAccount(customerId, account);
         return ResponseHandler.handle(account1, "Account Created Successfully", true, HttpStatus.OK);
     }
@@ -40,4 +40,13 @@ public class AccountController {
         return ResponseHandler.handle(accounts, "Accounts Fetched", true, HttpStatus.OK);
     }
 
+    @PutMapping("/status/{accountNumber}/{status}")
+    public ResponseEntity<Object> freezeAccount(@PathVariable String accountNumber, @PathVariable String status) {
+        try {
+            Account account = accountService.changeAccountStatus(accountNumber, status);
+            return ResponseHandler.handle(account, "Account status changed successfully", true, HttpStatus.OK);
+        } catch (Exception ex) {
+            return ResponseHandler.handle(ex.getMessage(), false, HttpStatus.BAD_REQUEST);
+        }
+    }
 }
