@@ -1,13 +1,12 @@
 package com.banking.bankingProject.dto.response;
 
+import com.banking.bankingProject.dto.UserInfo;
 import com.banking.bankingProject.enums.ModuleEnum;
-import com.banking.bankingProject.enums.RoleEnum;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Getter
 public class AuthenticationResponse {
@@ -24,23 +23,6 @@ public class AuthenticationResponse {
         this.permissions = permissions;
         this.userInfo = userInfo;
         this.loginTime = loginTime;
-    }
-
-    @Getter
-    public static class UserInfo {
-        private final Integer userId;
-        private final String username;
-        private final Set<RoleEnum> roles;
-        private final String email;
-        private final String fullName;
-
-        public UserInfo(Integer userId, String username, Set<RoleEnum> roles, String email, String fullName) {
-            this.userId = userId;
-            this.username = username;
-            this.roles = roles;
-            this.email = email;
-            this.fullName = fullName;
-        }
     }
 
     public static Builder builder() {

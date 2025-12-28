@@ -65,7 +65,7 @@ public class UserService {
     public Role addRoles(RoleDto roleDto) {
 
         Set<ModulePermission> modulePermissions = new HashSet<>();
-        for (ModulePermissionDto modulePermissionDto: roleDto.getModulePermissions()) {
+        for (ModulePermissionDto modulePermissionDto : roleDto.getModulePermissions()) {
 
             Module module = moduleRepository.findByName(modulePermissionDto.getModuleName());
             if (module == null) {
@@ -92,6 +92,36 @@ public class UserService {
         }
         role.setModulePermissions(modulePermissions);
         return roleRepository.save(role);
+    }
+
+    public List<RoleDto> permissions() {
+        List<Role> roles = roleRepository.findAll();
+        // Build permissions map
+        List<RoleDto> roleDtos = new ArrayList<>();
+        for (Role role : roles) {
+
+            RoleDto roleDto = new RoleDto();
+            roleDto.setName(role.getName());
+
+            if (role.getModulePermissions() != null) {
+                List<ModulePermissionDto> modulePermissionDtos = new ArrayList<>();
+
+                for (ModulePermission modulePermission : role.getModulePermissions()) {
+                    ModulePermissionDto modulePermissionDto = new ModulePermissionDto();
+                    modulePermissionDto.setModuleName(modulePermission.getModule().getName());
+                    List<PermissionEnum> perms = modulePermission.getPermissions()
+                            .stream()
+                            .map(Permission::getName)
+                            .toList();
+                    modulePermissionDto.setPermissions(perms);
+                    modulePermissionDtos.add(modulePermissionDto);
+                }
+
+                roleDto.setModulePermissions(modulePermissionDtos);
+            }
+            roleDtos.add(roleDto);
+        }
+        return roleDtos;
     }
 
     /*@PostConstruct

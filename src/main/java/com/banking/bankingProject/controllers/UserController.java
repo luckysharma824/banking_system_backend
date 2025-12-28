@@ -46,4 +46,9 @@ public class UserController {
         Role role = userService.addRoles(roleDto);
         return ResponseHandler.handle(role,"Roles successfully successfully", true, HttpStatus.OK);
     }
+
+    @GetMapping("/permissions")
+    public ResponseEntity<Object> permissions() {
+        return ResponseHandler.handle(userService.permissions(), "Role permissions successfully fetched", true, HttpStatus.OK);
+    }
 }

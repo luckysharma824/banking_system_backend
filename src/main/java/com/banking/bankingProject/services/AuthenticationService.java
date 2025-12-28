@@ -1,5 +1,6 @@
 package com.banking.bankingProject.services;
 
+import com.banking.bankingProject.dto.UserInfo;
 import com.banking.bankingProject.dto.request.LoginRequestDto;
 import com.banking.bankingProject.dto.response.AuthenticationResponse;
 import com.banking.bankingProject.entities.*;
@@ -28,7 +29,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
 
     public AuthenticationService(AuthenticationManager authenticationManager, JwtServiceImpl jwtService,
-            UserRepository userRepository) {
+                                 UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
@@ -88,7 +89,7 @@ public class AuthenticationService {
                     .collect(Collectors.toSet());
 
             // Build user info
-            AuthenticationResponse.UserInfo userInfo = new AuthenticationResponse.UserInfo(
+            UserInfo userInfo = new UserInfo(
                     user.getId(),
                     user.getUsername(),
                     roleEnums,
