@@ -21,8 +21,8 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Object> createAccount(@RequestParam String customerId, @RequestBody AccountDto account) {
+    @PostMapping("/create/{customerId}")
+    public ResponseEntity<Object> createAccount(@PathVariable String customerId, @RequestBody AccountDto account) {
         // return accountService.createAccount(customerId, account);
         Account account1 = accountService.createAccount(customerId, account);
         return ResponseHandler.handle(account1, "Account Created Successfully", true, HttpStatus.OK);
