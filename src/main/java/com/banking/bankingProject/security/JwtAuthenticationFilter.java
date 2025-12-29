@@ -33,23 +33,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
+        // Check if Authorization header exists and has Bearer token
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
             jwt = authHeader.substring(7);
+
+            // Validate token is not empty
+            if (jwt.trim().isEmpty()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             username = jwtService.extractUserName(jwt);
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                /*if (jwtService.isTokenValid(jwt, userDetails)) {*/
+                /* if (jwtService.isTokenValid(jwt, userDetails)) { */
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 context.setAuthentication(authToken);
                 SecurityContextHolder.setContext(context);
-                /* }*/
+                /* } */
             }
+        } catch (Exception e) {
+            // Log the error and continue the filter chain without authentication
+            logger.error("JWT token validation failed: " + e.getMessage());
         }
+
         filterChain.doFilter(request, response);
     }
 
 }
-

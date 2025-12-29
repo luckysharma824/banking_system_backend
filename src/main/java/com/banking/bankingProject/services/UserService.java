@@ -128,6 +128,91 @@ public class UserService {
         return roleDtos;
     }
 
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BankServiceException("EC-103", "User not found", null));
+    }
+
+    public User updateUser(Long userId, UserDto userDto) {
+        User user = getUserById(userId);
+
+        if (userDto.getUsername() != null && !userDto.getUsername().isEmpty()) {
+            user.setUsername(userDto.getUsername());
+        }
+
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
+            List<RoleEnum> roleEnums = userDto.getRoles().stream().map(RoleDto::getName).toList();
+            List<Role> roles = roleRepository.findByNameIn(roleEnums);
+            user.setRoles(new HashSet<>(roles));
+        }
+
+        return userRepository.save(user);
+    }
+
+    public Map<String, String> deleteUser(Long userId) {
+        User user = getUserById(userId);
+        userRepository.delete(user);
+        return Map.of("message", "User deleted successfully", "username", user.getUsername());
+    }
+
+    public Map<String, String> changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = getUserById(userId);
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new BankServiceException("EC-104", "Old password is incorrect", null);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return Map.of("message", "Password changed successfully");
+    }
+
+    public User updateUserRoles(Long userId, List<RoleDto> roleDtos) {
+        User user = getUserById(userId);
+
+        List<RoleEnum> roleEnums = roleDtos.stream().map(RoleDto::getName).toList();
+        List<Role> roles = roleRepository.findByNameIn(roleEnums);
+
+        user.setRoles(new HashSet<>(roles));
+        return userRepository.save(user);
+    }
+
+    public Map<String, Object> getUserStats() {
+        List<User> allUsers = userRepository.findAll();
+        Map<RoleEnum, Long> roleDistribution = new HashMap<>();
+
+        for (RoleEnum roleEnum : RoleEnum.values()) {
+            roleDistribution.put(roleEnum, 0L);
+        }
+
+        for (User user : allUsers) {
+            for (Role role : user.getRoles()) {
+                roleDistribution.merge(role.getName(), 1L, Long::sum);
+            }
+        }
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalUsers", allUsers.size());
+        stats.put("roleDistribution", roleDistribution);
+        stats.put("activeUsers", allUsers.size()); // Can be enhanced with actual active status
+
+        return stats;
+    }
+
+    public List<User> searchUsers(String search) {
+        // Search by username containing the search term (case-insensitive)
+        // Uses database-level filtering for better performance
+        if (search == null || search.trim().isEmpty()) {
+            return userRepository.findAll();
+        }
+        return userRepository.searchByUsername(search.trim());
+    }
+
     @PostConstruct
     public void init() {
         // Get existing modules from database

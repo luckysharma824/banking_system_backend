@@ -19,6 +19,7 @@ public class JwtServiceImpl {
     private final String SECRET_KEY = "VEhJUyBJUyBUSEUgU0VDUkVUIEtFWSBGT1IgSldUIFRPS0VO";
 
     public String extractUserName(String token) {
+        validateToken(token);
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -27,8 +28,19 @@ public class JwtServiceImpl {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try {
+            validateToken(token);
+            final String userName = extractUserName(token);
+            return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void validateToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new IllegalArgumentException("JWT token cannot be null or empty");
+        }
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
@@ -37,10 +49,10 @@ public class JwtServiceImpl {
     }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        /*long expiresIn = 60 * 60 * 24L;*/
+        /* long expiresIn = 60 * 60 * 24L; */
         return Jwts.builder().claims(extraClaims).subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                /*.expiration(new Date(System.currentTimeMillis() + 1000 * expiresIn))*/
+                /* .expiration(new Date(System.currentTimeMillis() + 1000 * expiresIn)) */
                 .signWith(getSigningKey())
                 .compact();
     }
