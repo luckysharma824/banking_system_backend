@@ -7,7 +7,7 @@ import com.banking.bankingProject.entities.Identity;
 import com.banking.bankingProject.repositories.AddressRepository;
 import com.banking.bankingProject.repositories.CustomerRepository;
 import com.banking.bankingProject.repositories.IdentityRepository;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,7 @@ public class CustomerService {
     public CustomerService(
             CustomerRepository customerRepository,
             AddressRepository addressRepository,
-            IdentityRepository identityRepository
-    ) {
+            IdentityRepository identityRepository) {
         this.customerRepository = customerRepository;
         this.addressRepository = addressRepository;
         this.identityRepository = identityRepository;
@@ -39,7 +38,8 @@ public class CustomerService {
         customer.setMother(customerDto.getMother());
         customer.setPhone(customerDto.getPhone());
         customer.setEmail(customerDto.getEmail());
-        customer.setCustomerId("CUS_" + Utility.getUuid(""));
+        // Generate customer ID with branch code (default: 0001) and check digit
+        customer.setCustomerId(IdGenerator.generateCustomerId("0001"));
         customerRepository.save(customer);
 
         List<Address> addresses = customerDto

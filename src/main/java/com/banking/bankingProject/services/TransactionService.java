@@ -7,7 +7,7 @@ import com.banking.bankingProject.enums.TransactionTypeEnum;
 import com.banking.bankingProject.exception.BankServiceException;
 import com.banking.bankingProject.repositories.AccountRepository;
 import com.banking.bankingProject.repositories.TransactionRepository;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -72,7 +72,8 @@ public class TransactionService {
     }
 
     public String transfer(String fromAccount, String toAccount, BigDecimal amount) {
-        String txnId = "TXN_" + Utility.getUuid("");
+        // Generate sortable transaction ID with timestamp and check digit
+        String txnId = IdGenerator.generateTransactionId("0001");
         withdraw(fromAccount, amount, txnId, TransactionTypeEnum.TRANSFER_OUT);
         deposit(toAccount, amount, txnId, TransactionTypeEnum.TRANSFER_IN);
         return txnId;

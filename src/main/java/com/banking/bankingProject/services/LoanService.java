@@ -11,7 +11,7 @@ import com.banking.bankingProject.repositories.AccountRepository;
 import com.banking.bankingProject.repositories.CustomerRepository;
 import com.banking.bankingProject.repositories.LoanPaymentRepository;
 import com.banking.bankingProject.repositories.LoanRepository;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,8 @@ public class LoanService {
         }
 
         Loan loan = new Loan();
-        loan.setLoanNumber("LOAN_" + Utility.getUuid(""));
+        // Generate loan number with timestamp and check digit
+        loan.setLoanNumber(IdGenerator.generateTransactionId("0001").replace("TXN", "LOAN"));
         loan.setCustomer(customer);
         loan.setAccount(account);
         loan.setLoanType(loanDto.getLoanType());
@@ -134,7 +135,8 @@ public class LoanService {
         payment.setPaymentAmount(amount);
         payment.setPrincipalAmount(principalAmount);
         payment.setInterestAmount(interestAmount);
-        payment.setPaymentReference("PAY_" + Utility.getUuid(""));
+        // Generate payment reference with timestamp and check digit
+        payment.setPaymentReference(IdGenerator.generateTransactionId("0001").replace("TXN", "PAY"));
 
         // Update loan outstanding amount
         loan.setOutstandingAmount(loan.getOutstandingAmount().subtract(principalAmount));

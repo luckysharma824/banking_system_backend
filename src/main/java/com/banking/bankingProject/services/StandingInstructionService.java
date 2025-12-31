@@ -5,11 +5,10 @@ import com.banking.bankingProject.entities.Account;
 import com.banking.bankingProject.entities.StandingInstruction;
 import com.banking.bankingProject.enums.StandingInstructionFrequency;
 import com.banking.bankingProject.enums.StandingInstructionStatus;
-import com.banking.bankingProject.enums.TransactionTypeEnum;
 import com.banking.bankingProject.exception.BankServiceException;
 import com.banking.bankingProject.repositories.AccountRepository;
 import com.banking.bankingProject.repositories.StandingInstructionRepository;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +40,8 @@ public class StandingInstructionService {
         }
 
         StandingInstruction instruction = new StandingInstruction();
-        instruction.setInstructionNumber("SI_" + Utility.getUuid(""));
+        // Generate standing instruction number with timestamp and check digit
+        instruction.setInstructionNumber(IdGenerator.generateTransactionId("0001").replace("TXN", "SI"));
         instruction.setFromAccount(fromAccount);
         instruction.setToAccountNumber(dto.getToAccountNumber());
         instruction.setToBeneficiaryName(dto.getToBeneficiaryName());

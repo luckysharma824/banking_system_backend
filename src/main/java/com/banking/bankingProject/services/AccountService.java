@@ -6,7 +6,7 @@ import com.banking.bankingProject.entities.Customer;
 import com.banking.bankingProject.enums.AccountStatus;
 import com.banking.bankingProject.repositories.AccountRepository;
 import com.banking.bankingProject.repositories.CustomerRepository;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,8 @@ public class AccountService {
         Customer customer = customerRepository.findByCustomerId(customerId);
         if (customer != null) {
             Account account = new Account();
-            account.setAccountNumber("ACC_" + Utility.getUuid(""));
+            // Generate account number with Luhn check digit
+            account.setAccountNumber(IdGenerator.generateAccountNumber("001", "0001", accountDto.getAccountType().name()));
             account.setAccountType(accountDto.getAccountType());
             account.setAccountStatus(accountDto.getAccountStatus());
             account.setBalance(accountDto.getBalance());
@@ -56,45 +57,4 @@ public class AccountService {
         account.setAccountStatus(AccountStatus.getAccountStatus(status.toUpperCase()));
         return accountRepository.save(account);
     }
-
-    public Account freezeAccount(String accountNumber) {
-
-        Account account = accountRepository.findByAccountNumber(accountNumber);
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-        account.setAccountStatus(com.banking.bankingProject.enums.AccountStatus.FROZEN);
-        return accountRepository.save(account);
-    }
-
-    public Account unfreezeAccount(String accountNumber) {
-        Account account = accountRepository.findByAccountNumber(accountNumber);
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-        account.setAccountStatus(com.banking.bankingProject.enums.AccountStatus.ACTIVE);
-        return accountRepository.save(account);
-    }
-
-    public Account closeAccount(String accountNumber) {
-        Account account = accountRepository.findByAccountNumber(accountNumber);
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-        if (account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
-            throw new RuntimeException("Cannot close account with non-zero balance");
-        }
-        account.setAccountStatus(com.banking.bankingProject.enums.AccountStatus.CLOSED);
-        return accountRepository.save(account);
-    }
-
-    public Account activateAccount(String accountNumber) {
-        Account account = accountRepository.findByAccountNumber(accountNumber);
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-        account.setAccountStatus(com.banking.bankingProject.enums.AccountStatus.ACTIVE);
-        return accountRepository.save(account);
-    }
-
 }

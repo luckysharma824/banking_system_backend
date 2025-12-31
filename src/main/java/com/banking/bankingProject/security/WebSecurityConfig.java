@@ -1,7 +1,6 @@
 package com.banking.bankingProject.security;
 
 import com.banking.bankingProject.entities.EndpointSecurity;
-import com.banking.bankingProject.enums.RoleEnum;
 import com.banking.bankingProject.services.EndpointSecurityService;
 import com.banking.bankingProject.services.JwtServiceImpl;
 import com.banking.bankingProject.services.UserDetailsServiceImpl;
@@ -28,7 +27,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -41,8 +39,8 @@ public class WebSecurityConfig {
     private final EndpointSecurityService endpointSecurityService;
 
     public WebSecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl,
-                             JwtServiceImpl jwtService,
-                             EndpointSecurityService endpointSecurityService) {
+            JwtServiceImpl jwtService,
+            EndpointSecurityService endpointSecurityService) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtService = jwtService;
         this.endpointSecurityService = endpointSecurityService;
@@ -62,39 +60,40 @@ public class WebSecurityConfig {
         LOGGER.info("Loading {} security rules from database", securityRules.size());
 
         return http.authorizeHttpRequests(registry -> {
-                    // Apply security rules from database
-                    for (EndpointSecurity rule : securityRules) {
-                        String[] roles = rule.getAllowedRoles().stream()
-                                .map(roleEnum -> roleEnum.name().replace("ROLE_", ""))
-                                .toArray(String[]::new);
+            // Apply security rules from database
+            for (EndpointSecurity rule : securityRules) {
+                String[] roles = rule.getAllowedRoles().stream()
+                        .map(roleEnum -> roleEnum.name().replace("ROLE_", ""))
+                        .toArray(String[]::new);
 
-                        if (rule.getPermitAll()) {
-                            if (rule.getHttpMethod() != null && !rule.getHttpMethod().isEmpty()) {
-                                registry.requestMatchers(HttpMethod.valueOf(rule.getHttpMethod()), rule.getUrlPattern())
-                                        .permitAll();
-                            } else {
-                                registry.requestMatchers(rule.getUrlPattern()).permitAll();
-                            }
-                            LOGGER.debug("Permit all for: {} {}", rule.getHttpMethod(), rule.getUrlPattern());
-                        } else if (roles.length > 0) {
-                            if (rule.getHttpMethod() != null && !rule.getHttpMethod().isEmpty()) {
-                                registry.requestMatchers(HttpMethod.valueOf(rule.getHttpMethod()), rule.getUrlPattern())
-                                        .hasAnyRole(roles);
-                            } else {
-                                registry.requestMatchers(rule.getUrlPattern()).hasAnyRole(roles);
-                            }
-                            LOGGER.debug("Secured: {} {} - Roles: {}", rule.getHttpMethod(), rule.getUrlPattern(),
-                                    String.join(", ", roles));
-                        }
+                if (rule.getPermitAll()) {
+                    if (rule.getHttpMethod() != null && !rule.getHttpMethod().isEmpty()) {
+                        registry.requestMatchers(HttpMethod.valueOf(rule.getHttpMethod()), rule.getUrlPattern())
+                                .permitAll();
+                    } else {
+                        registry.requestMatchers(rule.getUrlPattern()).permitAll();
                     }
+                    LOGGER.debug("Permit all for: {} {}", rule.getHttpMethod(), rule.getUrlPattern());
+                } else if (roles.length > 0) {
+                    if (rule.getHttpMethod() != null && !rule.getHttpMethod().isEmpty()) {
+                        registry.requestMatchers(HttpMethod.valueOf(rule.getHttpMethod()), rule.getUrlPattern())
+                                .hasAnyRole(roles);
+                    } else {
+                        registry.requestMatchers(rule.getUrlPattern()).hasAnyRole(roles);
+                    }
+                    LOGGER.debug("Secured: {} {} - Roles: {}", rule.getHttpMethod(), rule.getUrlPattern(),
+                            String.join(", ", roles));
+                }
+            }
 
-                    // Default: any other request must be authenticated
-                    registry.anyRequest().authenticated();
-                })
+            // Default: any other request must be authenticated
+            registry.anyRequest().authenticated();
+        })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsServiceImpl),
                         UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
@@ -127,7 +126,12 @@ public class WebSecurityConfig {
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, exception) -> {
             LOGGER.error("Error: ", exception);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED");
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            String errorMessage = exception.getMessage() != null ? exception.getMessage() : "Authentication failed";
+            response.getWriter().write(String.format(
+                    "{\"error\":\"Unauthorized\",\"message\":\"%s\",\"status\":401,\"path\":\"%s\"}",
+                    errorMessage, request.getRequestURI()));
         };
     }
 }

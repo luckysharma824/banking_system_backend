@@ -5,7 +5,7 @@ import com.banking.bankingProject.enums.TransactionTypeEnum;
 import com.banking.bankingProject.exception.BankServiceException;
 import com.banking.bankingProject.services.TransactionService;
 import com.banking.bankingProject.util.ResponseHandler;
-import com.banking.bankingProject.util.Utility;
+import com.banking.bankingProject.util.IdGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -28,7 +28,7 @@ public class TransactionController {
 
     @PostMapping("/deposit")
     public ResponseEntity<Object> deposit(@RequestParam String accountNumber, @RequestParam BigDecimal amount) {
-        String txnId = "TXN_" + Utility.getUuid("");
+        String txnId = IdGenerator.generateTransactionId("0001");
         try {
             Transaction transaction = transactionService.deposit(accountNumber, amount, txnId,
                     TransactionTypeEnum.DEPOSIT);
@@ -40,7 +40,7 @@ public class TransactionController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Object> withdraw(@RequestParam String accountNumber, @RequestParam BigDecimal amount) {
-        String txnId = "TXN_" + Utility.getUuid("");
+        String txnId = IdGenerator.generateTransactionId("0001");
         try {
             Transaction transaction = transactionService.withdraw(accountNumber, amount, txnId,
                     TransactionTypeEnum.WITHDRAW);
